@@ -8,16 +8,32 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController {
+class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
     
     var businesses: [Business]!
+    var searchBar = UISearchBar()
+    
+    @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.delegate = self
+        tableView.dataSource = self
+        //tableView.rowHeight = 105
+        tableView.rowHeight = UITableViewAutomaticDimension //Use AutoLayout Constraint rules
+        tableView.estimatedRowHeight = 120 //must be used in conjuction with ^, for scroll height
+        
+        //search bar
+        searchBar.delegate = self
+        searchBar.sizeToFit()
+        navigationItem.titleView = searchBar
+        
         Business.searchWithTerm(term: "Thai", completion: { (businesses: [Business]?, error: Error?) -> Void in
             
                 self.businesses = businesses
+                self.tableView.reloadData()
+            
                 if let businesses = businesses {
                     for business in businesses {
                         print(business.name!)
@@ -54,5 +70,23 @@ class BusinessesViewController: UIViewController {
      // Pass the selected object to the new view controller.
      }
      */
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if businesses != nil
+        {
+            return businesses!.count
+        }
+        else
+        {
+            return 0
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BusinessCell", for: indexPath) as! BusinessCell
+        
+        cell.business = businesses[indexPath.row]
+        
+        return cell
+    }
     
 }
